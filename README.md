@@ -2,6 +2,8 @@
 
 Este proyecto permite controlar un LED conectado a una placa Arduino (o compatible, como ESP32) mediante comandos enviados desde un script de Python a través del puerto serie.
 
+![Interfaz del Script](senialpython/interface.png)
+
 ## Requisitos
 
 ### Hardware
@@ -11,7 +13,7 @@ Este proyecto permite controlar un LED conectado a una placa Arduino (o compatib
 
 ### Software
 - [Arduino IDE](https://www.arduino.cc/en/software) para cargar el firmware.
-- [Python 3.14.3](https://www.python.org/) o superior.
+- [Python 3.12.5](https://www.python.org/) (Versión definida en `.python-version`).
 - [pyenv](https://github.com/pyenv/pyenv) (recomendado para la gestión de versiones).
 
 ## Entorno de Desarrollo
@@ -19,18 +21,18 @@ Este proyecto permite controlar un LED conectado a una placa Arduino (o compatib
 Este proyecto se ha desarrollado y probado con el siguiente entorno:
 
 - **OS:** Fedora Linux
-- **Python Version:** 3.14.3
+- **Python Version:** 3.12.5 (probado también en 3.14.3)
 - **Gestión de versiones:** `pyenv`
 
 ### Configuración del Entorno con pyenv
 
-Si utilizas `pyenv`, puedes configurar la versión específica del proyecto:
+El proyecto incluye un archivo `.python-version` que `pyenv` detectará automáticamente. Si tienes instalada la versión 3.12.5, se activará sola al entrar en la carpeta.
 
 ```bash
 # Instalar la versión si no la tienes
-pyenv install 3.14.3
+pyenv install 3.12.5
 
-# Configurar localmente en la carpeta del proyecto
+# Si prefieres usar tu versión actual de sistema (ej. 3.14.3)
 pyenv local 3.14.3
 ```
 
