@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    container_name: vitualsenial-app
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app:Z
+    # devices:
+    #   - "/dev/ttyUSB0:/dev/ttyUSB0"
+    # Si vas a usar una cámara con OpenCV, descomenta la siguiente línea:
+    # - "/dev/video0:/dev/video0"

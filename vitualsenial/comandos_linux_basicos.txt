@@ -1,0 +1,49 @@
+# ==========================================
+# GUÍA DE COMANDOS BÁSICOS DE LINUX (TERMINAL)
+# ==========================================
+
+# --- IDENTIDAD Y USUARIO ---
+whoami          # Muestra el nombre del usuario actual
+id              # Muestra el ID del usuario y los grupos a los que pertenece
+groups          # Lista los grupos del usuario actual
+sudo -i         # Entrar como superusuario (root) - CUIDADO
+
+# --- INFORMACIÓN DEL SISTEMA ---
+cat /etc/os-release    # Muestra la distribución de Linux y su versión (ej: Fedora 41)
+uname -a               # Muestra información del Kernel y la arquitectura
+hostnamectl            # Información detallada del nombre del equipo y el SO
+uptime                 # Cuánto tiempo lleva encendida la máquina
+
+# --- HARDWARE Y RECURSOS ---
+lscpu           # Información detallada del procesador (CPU)
+free -h         # Muestra la memoria RAM usada y disponible en formato legible
+df -h           # Muestra el espacio libre en los discos/particiones
+top             # Administrador de tareas en tiempo real (tecla 'q' para salir)
+htop            # Versión mejorada de top (si está instalado)
+lsusb           # Lista los dispositivos conectados por USB (útil para Arduino/ESP32)
+
+# --- NAVEGACIÓN Y ARCHIVOS ---
+pwd             # "Print Working Directory": muestra en qué carpeta estás
+ls -la          # Lista todos los archivos, incluyendo ocultos, con detalles
+cd ..           # Subir un nivel de carpeta
+cd ~            # Ir a tu carpeta personal (home)
+mkdir carpeta   # Crear una nueva carpeta
+rm -rf archivo  # Borrar archivos o carpetas (¡USA CON PRECAUCIÓN!)
+cp origen destino   # Copiar archivos
+mv origen destino   # Mover o renombrar archivos
+
+# --- REDES ---
+ip addr         # Muestra tus direcciones IP (reemplazo moderno de ifconfig)
+ping google.com # Prueba la conexión a internet
+nmcli           # Gestionar conexiones de red (específico de Fedora/RHEL)
+
+# --- GESTIÓN DE PAQUETES (Específico de Fedora) ---
+sudo dnf update       # Actualizar todo el sistema
+sudo dnf install pkg  # Instalar un nuevo programa o librería
+sudo dnf search pkg   # Buscar un programa en los repositorios
+
+# --- TRUCOS ÚTILES ---
+history         # Muestra los últimos comandos que escribiste
+clear           # Limpia la pantalla de la terminal
+man comando     # Muestra el manual de cualquier comando (ej: man ls)
+grep "texto" file # Buscar una palabra dentro de un archivo

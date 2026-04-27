@@ -1,0 +1,50 @@
+# ==========================================
+# GUÍA RÁPIDA DE COMANDOS PODMAN - VITUALSENIAL
+# ==========================================
+
+# --- GESTIÓN CON COMPOSE (Desde la carpeta del proyecto) ---
+# Levantar el contenedor en segundo plano (Recomendado)
+podman-compose up -d
+
+# Levantar y reconstruir la imagen (Si haces cambios en el Dockerfile)
+podman-compose up -d --build
+
+# Ver logs del contenedor en tiempo real
+podman-compose logs -f
+
+# Detener y eliminar los contenedores definidos en el compose
+podman-compose down
+
+# --- GESTIÓN INDIVIDUAL (Desde cualquier ubicación) ---
+# Ver qué contenedores están corriendo actualmente
+podman ps
+
+# Ver todos los contenedores (incluyendo los detenidos)
+podman ps -a
+
+# Detener el contenedor por nombre
+podman stop vitualsenial-app
+
+# Iniciar un contenedor detenido
+podman start vitualsenial-app
+
+# Reiniciar el contenedor
+podman restart vitualsenial-app
+
+# Ver logs sin estar en la carpeta del proyecto
+podman logs -f vitualsenial-app
+
+# --- INTERACCIÓN Y DEPURACIÓN ---
+# ENTRAR al contenedor (Abrir una terminal interna)
+podman exec -it vitualsenial-app /bin/bash
+
+# Ejecutar un comando rápido dentro del contenedor sin entrar
+# Ejemplo: ver versión de OpenCV
+podman exec vitualsenial-app python -c "import cv2; print(cv2.__version__)"
+
+# --- LIMPIEZA ---
+# Borrar imágenes que no se usan
+podman image prune
+
+# Borrar contenedores detenidos
+podman container prune
