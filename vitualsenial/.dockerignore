@@ -1,0 +1,32 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Git
+.git/
+.gitignore
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs y archivos temporales
+*.log
+.gemini/
+.python-version
+
+# Archivos de este proyecto que no deben ir a la imagen final
+comandos_podman.txt
+comandos_linux_basicos.txt
+README.md
+interface.png
