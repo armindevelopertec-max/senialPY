@@ -1,3 +1,5 @@
+python -c "import cv2; print('OpenCV funcionando, versión:', cv2.__version__)"
+
 # ==========================================
 # GUÍA DE COMANDOS BÁSICOS DE LINUX (TERMINAL)
 # ==========================================

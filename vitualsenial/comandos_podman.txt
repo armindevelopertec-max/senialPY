@@ -48,3 +48,12 @@ podman image prune
 
 # Borrar contenedores detenidos
 podman container prune
+
+
+"Engancharte" al proceso que ya está corriendo
+  Si quieres interactuar directamente con el ledOn.py que ya se está ejecutando (por ejemplo, para
+  enviarle teclas si no estuviera en modo -d), puedes usar desde Fedora:
+
+   1 podman attach vitualsenial-app
+  Nota: Si usas attach, al salir podrías detener el contenedor. Es mejor usar logs para ver y exec
+  para investigar.
