@@ -3,11 +3,10 @@ import termios
 import tty
 import serial
 import time
-import cv2  # Importar OpenCV para verificar instalación
+import cv2  
 
 print(f"OpenCV versión: {cv2.__version__}")
 
-# --- Serial ---
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200)
     time.sleep(2)
@@ -16,8 +15,6 @@ except Exception as e:
     ser = None
     print(f"ADVERTENCIA: No se pudo abrir el puerto serial ({e}).")
     print("Entrando en modo simulación (los comandos no se enviarán).")
-
-# --- getch ---
 
 def getch():
     fd = sys.stdin.fileno()
@@ -29,7 +26,6 @@ def getch():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
-# --- buffer ---
 buffer = ""
 
 print("Comandos: LED ON | LED OFF | ESC/q salir")
@@ -37,12 +33,10 @@ print("Comandos: LED ON | LED OFF | ESC/q salir")
 while True:
     tecla = getch()
 
-    # SALIR
     if tecla == '\x1b' or tecla == 'q':
         print("\nSaliendo...")
         break
 
-    # ENTER
     elif tecla == '\r' or tecla == '\n':
         print()
 
@@ -52,7 +46,6 @@ while True:
             if ser:
                 ser.write((comando + "\n").encode())
 
-                # leer respuesta del ESP32
                 respuesta = ser.readline().decode(errors='ignore').strip()
                 print("ESP32:", respuesta)
             else:
@@ -60,13 +53,11 @@ while True:
 
         buffer = ""
 
-    # BACKSPACE (Linux)
     elif tecla == '\x7f':
         if len(buffer) > 0:
             buffer = buffer[:-1]
             print('\b \b', end='', flush=True)
 
-    # CARACTER NORMAL
     else:
         buffer += tecla
         print(tecla, end='', flush=True)
