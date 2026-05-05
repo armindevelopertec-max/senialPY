@@ -21,14 +21,30 @@ while True:
         
             area= cv2.contourArea(c)
 
-            if area > 1000:
+            if area > 300:
             
+                M = cv2.moments(c)
+
+                if (M["m00"]==0): M["m00"]=1
+                
+                x = int (M["m10"]/M["m00"])
+
+                y = int (M['m01']/M['m00'])
+
+                cv2.circle(frame, (x,y), 2, (0,0,255), -1)
+
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                
+                cv2.putText(frame, '{},{}'.format(x,y), (x+10,y), font, 0.75, (0,255,0), 1, cv2.LINE_AA)
+
                 nuevoContorno = cv2.convexHull(c)
 
-                cv2.drawContours(frame, [nuevoContorno], -1, (0,255,0), 3)
+                cv2.drawContours(frame, [nuevoContorno], 0, (0,0,255), 3)
 
-                cv2.drawContours(frame, [c], -1, (0,0,255), 3)
+                #cv2.drawContours(frame, [c], 0, (0,0,255), 3)
 
+    cv2.imshow('maskAzul', frameHSV)
+               
     cv2.imshow('frame', frame)
 
     cv2.imshow('contornos', mask)
