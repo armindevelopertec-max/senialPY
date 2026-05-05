@@ -37,9 +37,20 @@ while True:
                 
                 cv2.putText(frame, '{},{}'.format(x,y), (x+10,y), font, 0.75, (0,255,0), 1, cv2.LINE_AA)    
 
-                nuevoContorno = cv2.convexHull(c)
+                perimetro = cv2.arcLength(c, True)
 
-                cv2.drawContours(frame, [nuevoContorno], 0, (0,0,255), 3)
+                approx = cv2.approxPolyDP(c, 0.02 * perimetro, True)
+
+                vertices = len (approx)
+
+                cv2.drawContours(frame, [approx], 0, (255,0,0), 3)
+                cv2.putText(frame, f"Vertices: {vertices}", (x-50, y-20), font , 0.6, (0,255,255), 2)   
+                
+                if vertices == 3:
+                
+                    cv2.putText(frame, "Triangulo", (x-50, y-50), font , 0.8, (0,0,255), 2)   
+                
+                     
 
                 #cv2.drawContours(frame, [c], 0, (0,0,255), 3)
 
