@@ -93,7 +93,7 @@ while True:
         for c in contornos:
             area = cv2.contourArea(c)
 
-            if area > 300:
+            if area > 1000:
                 M = cv2.moments(c)
 
                 if (M["m00"] == 0):
@@ -110,35 +110,10 @@ while True:
                 font = cv2.FONT_HERSHEY_SIMPLEX
 
                 cv2.circle(frame, (x, y), 2, (0, 0, 255), -1)
-                cv2.putText(
-                    frame,
-                    "{},{}".format(x, y),
-                    (x + 10, y),
-                    font,
-                    0.75,
-                    (0, 255, 0),
-                    1,
-                    cv2.LINE_AA,
-                )
+                cv2.putText(frame,"{},{}".format(x, y),(x + 10, y),font, 0.75,(0, 255, 0), 1, cv2.LINE_AA )
                 cv2.drawContours(frame, [approx], 0, (255, 0, 0), 3)
-                cv2.putText(
-                    frame,
-                    f"Vertices: {vertices}",
-                    (x - 60, y - 20),
-                    font,
-                    0.6,
-                    (0, 255, 255),
-                    2,
-                )
-                cv2.putText(
-                    frame,
-                    figura,
-                    (x - 60, y - 50),
-                    font,
-                    0.8,
-                    (0, 0, 255),
-                    2,
-                )
+                cv2.putText( frame, f"Vertices: {vertices}",  (x - 60, y - 20), font,  0.6, (0, 255, 255), 2 )
+                cv2.putText( frame, figura, (x - 60, y - 50), font,  0.8, (0, 0, 255), 2  )
 
         cv2.imshow("maskAzul", frameHSV)
         cv2.imshow("frame", frame)
