@@ -7,7 +7,7 @@ import numpy as np
 base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
 options = vision.HandLandmarkerOptions(
     base_options=base_options,
-    num_hands=1,
+    num_hands=2,
     min_hand_detection_confidence=0.7,
     running_mode=vision.RunningMode.VIDEO
 )

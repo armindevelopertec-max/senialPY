@@ -1,0 +1,19 @@
+rmintec@fedora:~/Arduino/senialPY/firtsCV/mediapipe$ ls
+ bazel-bin                   build_ios_examples.sh                 MANIFEST.in        󰌠 requirements.txt               third_party
+ bazel-mediapipe             CONTRIBUTING.md                       mediapipe           requirements_lock.txt          tsconfig.json
+ bazel-out                   Dockerfile                            MODULE.bazel        requirements_lock_3_10.txt     WORKSPACE
+ bazel-testlogs              Dockerfile.manylinux2014_aarch64rp4   MODULE.bazel.lock   requirements_lock_3_11.txt    
+ BUILD                       Dockerfile.manylinux_2_28_x86_64      package.json        requirements_lock_3_12.txt    
+ BUILD.bazel                 docs                                  platform_mappings   setup.py                      
+ build_android_examples.sh   hand_landmarker.task                  pnpm-lock.yaml      setup_android_sdk_and_ndk.sh  
+ build_desktop_examples.sh   LICENSE                               README.md           setup_opencv.sh               
+armintec@fedora:~/Arduino/senialPY/firtsCV/mediapipe$ cd mediapipe/
+armintec@fedora:~/Arduino/senialPY/firtsCV/mediapipe/mediapipe$ ls
+ __init__.py   calculators   examples    gpu      java                  model_maker   modules   platforms.bzl   tasks   version.bzl
+ BUILD         docs          framework   graphs   MediaPipe.tulsiproj   models        objc      python          util    web
+armintec@fedora:~/Arduino/senialPY/firtsCV/mediapipe/mediapipe$ cd examples/desktop/mi_detector/
+armintec@fedora:~/Arduino/senialPY/firtsCV/mediapipe/mediapipe/examples/desktop/mi_detector$ ls
+ BUILD   mi_detector.cpp
+armintec@fedora:~/Arduino/senialPY/firtsCV/mediapipe/mediapipe/examples/desktop/mi_detector$ 
+
+
