@@ -15,7 +15,7 @@ parser.add_argument("--mock", action="store_true", help="Modo emulación (sin Bl
 parser.add_argument("--mac", type=str, default="CC:7B:5C:23:4C:E2", help="Dirección MAC del ESP32")
 args = parser.parse_args()
 
-NOMBRE_BT = "MrRootBot_Ultra_Final"
+NOMBRE_BT = "MrRootBot"
 MAC_ESP32 = args.mac 
 PUERTO = 1
 MOCK_MODE = args.mock
