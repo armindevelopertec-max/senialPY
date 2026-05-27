@@ -1,17 +1,4 @@
 # control_manos_robot_bt.py
-# Requiere:
-# pip install opencv-python mediapipe pybluez
-#
-# Gestos:
-# 👍 Pulgar arriba        -> AVANZAR
-# 👎 Pulgar abajo         -> RETROCEDER
-# 👈 Índice + pulgar izq  -> GIRAR IZQUIERDA
-# 👉 Índice + pulgar der  -> GIRAR DERECHA
-# ✊ Puño cerrado         -> STOP
-#
-# Compatible con mano izquierda y derecha.
-# Envía comandos Bluetooth al ESP32.
-
 import cv2
 import mediapipe as mp
 import socket
@@ -21,7 +8,7 @@ import sys
 import argparse
 
 # =========================
-# CONFIGURACIÓN Y ARGUMENTOS
+# CONFIGURACIÓN Y FILTROS
 # =========================
 parser = argparse.ArgumentParser(description="Control de Robot por Gestos")
 parser.add_argument("--mock", action="store_true", help="Modo emulación (sin Bluetooth)")
@@ -32,6 +19,12 @@ NOMBRE_BT = "MrRootBot_Ultra_Final"
 MAC_ESP32 = args.mac 
 PUERTO = 1
 MOCK_MODE = args.mock
+
+UMBRAL_CONFIRMACION = 3  # Fotogramas seguidos para cambiar de comando
+contadores = {"STOP": 0, "IZQ": 0, "DER": 0, "UP": 0, "DOWN": 0}
+
+comando_persistente = "S"
+texto_estado = "STOP"
 
 sock = None
 
@@ -49,7 +42,7 @@ else:
     print("Modo EMULACIÓN activado.")
 
 # =========================
-# MEDIAPIPE
+# MEDIAPIPE Y CÁMARA
 # =========================
 mp_hands = mp.solutions.hands
 mp_draw = mp.solutions.drawing_utils
@@ -63,23 +56,33 @@ hands = mp_hands.Hands(
 
 cap = cv2.VideoCapture(0)
 
-comando_persistente = "S"
-texto_estado = "STOP"
-
 # =========================
 # FUNCIONES
 # =========================
 def enviar_persistente(comando):
     """Envía el comando actual en cada iteración del loop"""
     if MOCK_MODE:
-        # En mock solo printeamos si cambia para no saturar la terminal, 
-        # pero la lógica real enviará siempre.
         return
 
     try:
         sock.send((comando + "\n").encode('utf-8'))
     except Exception as e:
         print("Error de comunicación:", e)
+
+def actualizar_comando(nuevo_comando, nuevo_texto, clave_contador):
+    """Solo cambia el comando si se mantiene varios fotogramas"""
+    global comando_persistente, texto_estado
+    
+    # Reiniciar los otros contadores
+    for k in contadores:
+        if k != clave_contador:
+            contadores[k] = 0
+            
+    contadores[clave_contador] += 1
+    
+    if contadores[clave_contador] >= UMBRAL_CONFIRMACION:
+        comando_persistente = nuevo_comando
+        texto_estado = nuevo_texto
 
 # =========================
 # LOOP PRINCIPAL
@@ -92,82 +95,76 @@ while cap.isOpened():
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     resultado = hands.process(rgb)
 
+    gesto_detectado_en_frame = False
+
     if resultado.multi_hand_landmarks:
-        for mano in resultado.multi_hand_landmarks:
-            mp_draw.draw_landmarks(frame, mano, mp_hands.HAND_CONNECTIONS)
-            puntos = mano.landmark
+        # Tomamos solo la primera mano para evitar interferencias
+        mano = resultado.multi_hand_landmarks[0]
+        mp_draw.draw_landmarks(frame, mano, mp_hands.HAND_CONNECTIONS)
+        puntos = mano.landmark
 
-            # Puntos clave (TIP y PIP/IP)
-            p = {
-                'pulgar_tip': puntos[4], 'pulgar_ip': puntos[3],
-                'indice_tip': puntos[8], 'indice_pip': puntos[6],
-                'medio_tip': puntos[12], 'medio_pip': puntos[10],
-                'anular_tip': puntos[16], 'anular_pip': puntos[14],
-                'menique_tip': puntos[20], 'menique_pip': puntos[18]
-            }
+        p = {
+            'pulgar_tip': puntos[4], 'pulgar_ip': puntos[3],
+            'indice_tip': puntos[8], 'indice_pip': puntos[6],
+            'medio_tip': puntos[12], 'medio_pip': puntos[10],
+            'anular_tip': puntos[16], 'anular_pip': puntos[14],
+            'menique_tip': puntos[20], 'menique_pip': puntos[18]
+        }
 
-            # Lógica de dedos extendidos (más robusta)
-            pulgar_up = p['pulgar_tip'].y < p['pulgar_ip'].y
-            indice_up = p['indice_tip'].y < p['indice_pip'].y
-            medio_up = p['medio_tip'].y < p['medio_pip'].y
-            anular_up = p['anular_tip'].y < p['anular_pip'].y
-            menique_up = p['menique_tip'].y < p['menique_pip'].y
-            
-            # PALMA ABIERTA (Saludo) -> STOP
-            # Si todos los dedos están hacia arriba
-            palma_abierta = indice_up and medio_up and anular_up and menique_up
-            
-            # PUÑO (Opcional, ahora podrías usarlo para otra cosa o ignorarlo)
-            punio = not (indice_up or medio_up or anular_up or menique_up)
-            
-            pulgar_down = p['pulgar_tip'].y > p['pulgar_ip'].y
-            dx_pulgar = p['pulgar_tip'].x - p['pulgar_ip'].x
-            
-            # Direcciones del índice para giros
-            dx_indice = p['indice_tip'].x - p['indice_pip'].x
-            # Consideramos que apunta a un lado si la diferencia en X es mayor que en Y
-            apunta_lado = abs(dx_indice) > abs(p['indice_tip'].y - p['indice_pip'].y)
+        # 1. ESTADO DE DEDOS
+        indice_up = p['indice_tip'].y < p['indice_pip'].y
+        pulgar_up = p['pulgar_tip'].y < p['pulgar_ip'].y
+        pulgar_down = p['pulgar_tip'].y > p['pulgar_ip'].y
+        
+        # 2. DETECCIÓN DE GIROS (Prioridad Alta - Solo mira el Índice)
+        dx_indice = p['indice_tip'].x - p['indice_pip'].x
+        dy_indice = p['indice_tip'].y - p['indice_pip'].y
+        apunta_horizontal = abs(dx_indice) > abs(dy_indice) * 1.5
 
-            # ASIGNACIÓN DE COMANDO PERSISTENTE (Prioridad: STOP > GIROS > ADELANTE/ATRAS)
-            if palma_abierta:
-                comando_persistente = "S"
-                texto_estado = "STOP (Palma)"
-            
-            # Giros (Independientes del pulgar)
-            elif apunta_lado and dx_indice < -0.05:
-                comando_persistente = "K:0,1.8"
-                texto_estado = "IZQUIERDA"
-            elif apunta_lado and dx_indice > 0.05:
-                comando_persistente = "K:0,-1.8"
-                texto_estado = "DERECHA"
-            
-            # Movimiento lineal
-            elif pulgar_up and not indice_up:
-                comando_persistente = "K:0.25,0"
-                texto_estado = "ADELANTE"
-            elif pulgar_down and not indice_up:
-                comando_persistente = "K:-0.20,0"
-                texto_estado = "ATRAS"
+        # 3. PALMA ABIERTA (Solo si todos están arriba)
+        dedos_arriba = sum([p[tip].y < p[pip].y for tip, pip in [
+            ('indice_tip', 'indice_pip'), ('medio_tip', 'medio_pip'), 
+            ('anular_tip', 'anular_pip'), ('menique_tip', 'menique_pip')
+        ]])
 
-    # ENVÍO CONSTANTE (Fuera del if de detección de manos si quieres que mantenga el último comando)
-    # O dentro si quieres que se detenga al quitar la mano. 
-    # Siguiendo tu lógica de "flecha", lo mantenemos persistente.
+        # --- LÓGICA DE DECISIÓN "BLOQUEANTE" ---
+        
+        if dedos_arriba >= 3: # Si hay 3 o más dedos arriba, es probable que sea STOP
+            actualizar_comando("S", "STOP (Palma)", "STOP")
+            gesto_detectado_en_frame = True
+
+        elif apunta_horizontal and abs(dx_indice) > 0.06:
+            if dx_indice < 0:
+                actualizar_comando("K:0,1.8", "IZQUIERDA", "IZQ")
+            else:
+                actualizar_comando("K:0,-1.8", "DERECHA", "DER")
+            gesto_detectado_en_frame = True
+
+        elif pulgar_up and not indice_up:
+            actualizar_comando("K:0.25,0", "ADELANTE", "UP")
+            gesto_detectado_en_frame = True
+
+        elif pulgar_down and not indice_up:
+            actualizar_comando("K:-0.20,0", "ATRAS", "DOWN")
+            gesto_detectado_en_frame = True
+
+    if not gesto_detectado_en_frame:
+        # Si no detecta nada claro, vamos reseteando contadores poco a poco
+        for k in contadores: contadores[k] = max(0, contadores[k] - 1)
+
+    # ENVÍO CONSTANTE
     enviar_persistente(comando_persistente)
 
-    # UI
+    # UI MEJORADA
     color = (0, 0, 255) if comando_persistente == "S" else (0, 255, 0)
-    cv2.putText(frame, f"COMANDO: {texto_estado}", (20, 50), 
+    cv2.rectangle(frame, (10, 10), (400, 60), (0,0,0), -1)
+    cv2.putText(frame, f"ROBOT: {texto_estado}", (20, 45), 
                 cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
-    if MOCK_MODE:
-        cv2.putText(frame, "MODO MOCK ACTIVADO", (20, 90), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 1)
 
-    cv2.imshow("Robot Gestos Persistente", frame)
+    cv2.imshow("Control Robusto - Fedora", frame)
     if cv2.waitKey(1) == 27: break
-    time.sleep(0.01) # Pequeño delay para no saturar el CPU
-
+    time.sleep(0.01)
 
 cap.release()
 if sock: sock.close()
 cv2.destroyAllWindows()
-
